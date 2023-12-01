@@ -1,0 +1,16 @@
+version: "3.7"
+
+services:
+  db:
+    image: postgres
+    container_name: database
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: my-weak-password
+    volumes:
+      - /var/lib/postgresql/data
+    ports:
+      - 5432:5432
+ 
