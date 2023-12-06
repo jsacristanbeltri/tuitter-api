@@ -11,11 +11,11 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.use(
     session({
-      secret: 'asiodasjoddjdoasddasoidjasiodasdjaiodd',
+      secret: AppModule.secret,
       saveUninitialized: false,
       resave: false,
       cookie: {
-        maxAge: 60000,
+        maxAge: 6000000,
       },
     }),
   );

@@ -26,6 +26,15 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+Tuiter api, backend developed on nestjs with typescript, specifications: 
+- CRUD operations. 
+- Database access with typeorm
+- Relations onetoone, manytoone, manytomany
+- Authorization and Authentication with passport. 
+- Oauth2 google. 
+- Role management.
+- Enviroment management.  
+
 ## Installation
 
 ```bash

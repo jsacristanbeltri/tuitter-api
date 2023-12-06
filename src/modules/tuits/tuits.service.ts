@@ -8,31 +8,31 @@ import { PaginationQueryDto } from './dto/pagination-query.dto';
 
 @Injectable()
 export class TuitsService {
-
+    
     constructor(
         @InjectRepository(Tuit) private readonly tuitRepository: Repository<Tuit>,
         @InjectRepository(User) private readonly userRepository: Repository<User>
-    ) {}
+        ) {}
 
-    //puedes generar todos los metodos crud?
-    //get all   
-    async getAllTuits({limit,offset}: PaginationQueryDto): Promise<Tuit[]> {
-        return await this.tuitRepository.find({relations: ['user'], take: limit, skip: offset});
+        //puedes generar todos los metodos crud?
+        //get all   
+        async getAllTuits({limit,offset}: PaginationQueryDto): Promise<Tuit[]> {
+            return await this.tuitRepository.find({relations: ['user', 'likes'], take: limit, skip: offset});
     }
     
     //get one
     async getTuit(id: number): Promise<Tuit> {
         const tuit: Tuit = await this.tuitRepository.findOne({ 
             where: { id },
-            relations: ['user']
+            relations: ['user', 'likes']
         });
         if (!tuit) {
             throw new NotFoundException('Tuit not found');
         }
-
+        
         return tuit;
     }
-
+    
     //create one
     async createTuit(createTuitDto: CreateTuitDto) : Promise<Tuit> {
         const user: User = await this.userRepository.findOneBy({email: createTuitDto.email});
@@ -41,7 +41,8 @@ export class TuitsService {
         }
         const newTuit: Tuit = this.tuitRepository.create({
             message: createTuitDto.message,
-            user: user
+            user: user,
+            likes: []
         })
         this.tuitRepository.save(newTuit);
         return newTuit;
@@ -73,6 +74,30 @@ export class TuitsService {
             this.tuitRepository.remove(tuit);
         }
     }
+    
+    async addLike(id: number, request: any): Promise<Tuit> {
+        const tuit: Tuit = await this.tuitRepository.findOne({ 
+            where: { id },
+            relations: ['user','likes']
+        });
+        if (!tuit) {
+            throw new NotFoundException('Tuit not found');
+        }
 
+        const user: User = await this.userRepository.findOneBy({email: request.user.email});
+        if(!user) {
+            throw new NotFoundException('User not found');
+        }
+        
+        if(tuit.likes===null)
+        {
+            tuit.likes = [];
+        }
+        tuit.likes.push(user);
+        await this.tuitRepository.save(tuit);
+        return tuit;
 
+    }
+    
+    
 }

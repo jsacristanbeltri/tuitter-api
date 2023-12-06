@@ -6,6 +6,9 @@ import { UsersModule } from './modules/users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
+import { RolesGuard } from './auth/Utils/roles.guard';
+import { APP_GUARD } from '@nestjs/core';
+
 
 
 @Module({
@@ -22,7 +25,9 @@ import { AuthModule } from './auth/auth.module';
 
 export class AppModule {
   static port: number;
+  static secret: string;
   constructor(private readonly configService: ConfigService) {
     AppModule.port = +this.configService.get('PORT');
+    AppModule.secret = this.configService.get('JWT_SECRET');
   }
 }

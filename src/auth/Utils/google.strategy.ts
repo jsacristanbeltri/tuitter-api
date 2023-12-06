@@ -4,7 +4,7 @@ import { Profile, Strategy } from 'passport-google-oauth20';
 import { AuthService } from '../auth.service';
 
 @Injectable()
-export class GoogleStrategy extends PassportStrategy(Strategy) {
+export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
     @Inject('AUTH_SERVICE') private readonly authService: AuthService,
   ) {
@@ -17,10 +17,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(accessToken: string, refreshToken: string, profile: Profile) {
+    console.log('GoogleStrategy: Validating user by Google OAuth2');
     console.log('access token: ' + accessToken);
     console.log('refresh token: ' + refreshToken);
     console.log('profile: ' + profile);
-    const user = await this.authService.validateUser({
+    const user = await this.authService.validateGoogleUser({
       name: profile.name.givenName,
       username: profile.name.givenName,
       password: profile.id,

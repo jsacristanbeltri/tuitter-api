@@ -5,6 +5,8 @@ import { User } from '../modules/users/entities'
 import { UserDetails } from '../utils/types';
 import { UsersService } from 'src/modules/users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { sign } from 'jsonwebtoken';
+import { IAuthenticate } from './Utils/i_authenticate';
 
 
 @Injectable()
@@ -14,18 +16,35 @@ export class AuthService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  async signIn(email, pass) {
+  async login(user: User) {
+    const payload = { username: user.username, sub: user.id, roles: user.role[0] };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+  
+  async signIn(email, pass): Promise<IAuthenticate> {
     const user = await this.usersService.getUserByEmail(email);
     if (user?.password !== pass) {
       throw new UnauthorizedException();
     }
-    const payload = { sub: user.id, username: user.username };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
-    };
+    const payload = { sub: user.id, username: user.username, role: user.role[0]};
+    const token = await this.jwtService.signAsync(payload);
+    //const token = sign({ ...user}, 'secrete')
+    return {token,user};
   }
 
-  async validateUser(details: UserDetails) {
+  async validateUser(username: string, pass: string): Promise<any> {
+    console.log('Validate User (username: ' + username);
+    const user = await this.userRepository.findOne({ where: { username } });
+    if (user) {
+      console.log ('user found on db: ' + user)
+      return user;
+    } 
+    return null;   
+  }
+
+  async validateGoogleUser(details: UserDetails) {
     console.log('AuthService');
     console.log(details);
     const email = details.email;
@@ -36,7 +55,6 @@ export class AuthService {
       return user;
     } else{
       console.log('User not found. Creating...');
-      details.name = '1234'
       const newUser = this.userRepository.create(details);
       return this.userRepository.save(newUser);
     }
